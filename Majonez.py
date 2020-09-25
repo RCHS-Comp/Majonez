@@ -141,12 +141,22 @@ Scale = 1
 ColourFinalised = False
 
 def Sync(Equivalent, Scaling):
+    global Scale
+    global DispScale
     if type(Scaling) != int:
         print("The scale factor isn't an int, you'd be better off fixing that.\\n")
+        Screen = pygame.display.set_mode((ScreenSizeX, ScreenSizeY), 0, 32)
+        InitScreen = Screen
+        Scale = 1
+        pygame.display.set_caption('Window on PC with 1x scaling.')
     else:
+        Screen = pygame.display.set_mode(((ScreenSizeX * Scaling), (ScreenSizeY * Scaling)), 0, 32)
+        InitScreen = Screen
         Scale = Scaling
+        pygame.display.set_caption('Window on PC with %sx scaling.' % str(Scaling))
     if type(Equivalent) == tuple or type(Equivalent) == list:
         if len(Equivalent) == 8:
+            global CPU_Equ
             CPU_Equ = Equivalent
         else:
             print("The button length doesn't match, you may want to fix it.\\n")
