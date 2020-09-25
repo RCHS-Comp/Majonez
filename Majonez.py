@@ -135,7 +135,7 @@ from pygame.locals import *
 
 SpriteList = [[], []]
 ColourList = []
-CPU_Equ = ["X", "Z", "S", "A", "Q", "W", "=", "-"]
+CPU_Equ = ["X", "Z", "S", "A", "Q", "W", "=", "-", "up", "down", "left", "right"]
 Scale = 1
 
 ColourFinalised = False
@@ -155,7 +155,7 @@ def Sync(Equivalent, Scaling):
         Scale = Scaling
         pygame.display.set_caption('Window on PC with %sx scaling.' % str(Scaling))
     if type(Equivalent) == tuple or type(Equivalent) == list:
-        if len(Equivalent) == 8:
+        if len(Equivalent) == 12:
             global CPU_Equ
             CPU_Equ = Equivalent
         else:
@@ -164,7 +164,7 @@ def Sync(Equivalent, Scaling):
         print("The button isn't an array, you may want to fix that.\\n")
 
 def CheckKey(KeyName):
-    DS_Buttons = ["KEY_A", "KEY_B", "KEY_X", "KEY_Y", "KEY_L", "KEY_R", "KEY_START", "KEY_SELECT"]
+    DS_Buttons = ["KEY_A", "KEY_B", "KEY_X", "KEY_Y", "KEY_L", "KEY_R", "KEY_START", "KEY_SELECT", "KEY_UP", "KEY_DOWN", "KEY_LEFT", "KEY_RIGHT"]
     Output = CPU_Equ[DS_Buttons.index(KeyName)]
     try:
         ToReturn = keyboard.is_pressed(Output.lower())
@@ -293,23 +293,9 @@ def CheckSize(Size):
         return "Size isn't even in the correct format, you'd probably want to fix this.\n"
 
 def MakeIf(Statement, Not=False, PythonMode=True):
+    Statement = Statement.lower()
     Statement = Statement.replace('==', '=')
     Statement = Statement.replace('!=', '=')
-    
-    Statement = Statement.replace('Or', 'or')
-    Statement = Statement.replace('oR', 'or')
-    Statement = Statement.replace('OR', 'or')
-
-    Statement = Statement.replace('And', 'and')
-    Statement = Statement.replace('aNd', 'and')
-    Statement = Statement.replace('anD', 'and')
-    Statement = Statement.replace('AND', 'and')
-    
-    Statement = Statement.replace('ANd', 'and')
-    Statement = Statement.replace('AnD', 'and')
-    
-    Statement = Statement.replace('aND', 'and')
-    Statement = Statement.replace('AnD', 'and')
     
     if PythonMode != True:
         Statement = Statement.replace('or', '||')
@@ -324,7 +310,7 @@ def MakeIf(Statement, Not=False, PythonMode=True):
         return Statement
 
 def ConvertFromHGF(Script, PythonMode=True, ForceCreate=False):
-    TypesAllowed = ['int', 'float', 'double']
+    TypesAllowed = ['int', 'double', 'float']
     Output = []
     IndentCount = 0
     Setup = False
@@ -339,6 +325,7 @@ def ConvertFromHGF(Script, PythonMode=True, ForceCreate=False):
     KeyCheck = False
     ExtPalette = False
     IfWarning = False
+    MathWarning = False
     if ForceCreate == True:
         print('This program will be *forced* to be created no matter how many errors there are.')
         print('It can and will be bound to fail, by doing this you know the repercussions.')
@@ -364,8 +351,8 @@ def ConvertFromHGF(Script, PythonMode=True, ForceCreate=False):
                         Output.append(Indent + '# Generated from HGF')
                         Output.append(Indent + 'print("HGF and the HGF converter were\\ncreated by Harry Nelsen\\n")')
                         Output.append(Indent + 'Scale = 1\n')
-                        Output.append(Indent + 'DS_Buttons = ["A", "B", "X", "Y", "L", "R", "START", "SELECT"]')
-                        Output.append(Indent + 'CPU_Equ = ["X", "Z", "S", "A", "Q", "W", "=", "-"]\n')
+                        Output.append(Indent + 'DS_Buttons = ["A", "B", "X", "Y", "L", "R", "START", "SELECT", "UP", "DOWN", "LEFT", "RIGHT"]')
+                        Output.append(Indent + 'CPU_Equ = ["X", "Z", "S", "A", "Q", "W", "=", "-", "up", "down", "left", "right"]\n')
                         Output.append(Indent + 'Sync(CPU_Equ, Scale)\n')
                     else:
                         Output.append(Indent + '#include <nds.h>')
@@ -423,13 +410,13 @@ def ConvertFromHGF(Script, PythonMode=True, ForceCreate=False):
                     print('Key checking has already been called, consider fixing it.\n')
             elif (Line[:10].lower()) == 'check_key:':
                 if KeyCheck == True:
-                    if (Line[10:].lower()) in ['a', 'b', 'x', 'y', 'l', 'r', 'select', 'start']:
+                    if (Line[10:].lower()) in ['a', 'b', 'x', 'y', 'l', 'r', 'select', 'start', 'up', 'down', 'left', 'right']:
                         StartedLoops += 1
                         if PythonMode == True:
                             Output.append(Indent + 'if CheckKey("KEY_' + (Line[10:].upper()) + '"):')
                             IndentCount += 1
                         else:
-                            Output.append(Indent + 'if(keys & KEY_' + (Line[10:].upper()) + ') {')
+                            Output.append(Indent + 'if((keys & KEY_' + (Line[10:].upper()) + ')) {')
                             IndentCount += 1
                     else:
                         print("Key doesn't exist, consider fixing it.\n")
@@ -446,12 +433,13 @@ def ConvertFromHGF(Script, PythonMode=True, ForceCreate=False):
                 else:
                     print('A refresh sequence has already been implemented, consider fixing this.\n')
             elif Line.lower() == 'exitcheck':
-                if KeyCheck == True:
+                if KeyCheck != False:
                     if PythonMode == True:
                         Output.append(Indent + 'CheckExit()')
                     else:
                         Output.append(Indent + 'if(keys & KEY_SELECT) break;\n')
                 else:
+                    Error += 1
                     print('Key checking has not been called yet, consider fixing it.\n')
             elif (Line[:8].lower()) == 'colmake:':
                 if ExtPalette == False:
@@ -459,8 +447,10 @@ def ConvertFromHGF(Script, PythonMode=True, ForceCreate=False):
                         print('It is suggested to place this before the loop, you might want to fix it.\n')
                     if PythonMode == True:
                         Output.append((Indent + 'MakeColour(%s, %s)') % ((ConvertRGB((Line[8:].lower().split('|'))[1], False)), ((Line[8:].lower().split('|'))[0])))
+                        Colours.append((Line[8:].lower().split('|'))[0])
                     else:
                         Output.append((Indent + 'VRAM_F_EXT_SPR_PALETTE[%s][1] = %s;') % (((Line[8:].lower().split('|'))[0]), ConvertRGB((Line[8:].lower().split('|'))[1], True)))
+                        Colours.append((Line[8:].lower().split('|'))[0])
                 else:
                     print('Palette already ended.\n')
             elif (Line[:8].lower()) == 'sprmake:':
@@ -490,30 +480,33 @@ def ConvertFromHGF(Script, PythonMode=True, ForceCreate=False):
             elif (Line[:8].lower()) == 'sprdraw:':
                 if ExtPalette == True:
                     if ((Line[8:].lower().split('|'))[0]) in Sprites:
-                        if PythonMode == True:
-                            State = (Line[8:].lower().split('|'))[3]
-                            if State in ['false', 'true']:
-                                State = (State[:1]).upper() + (State[1:]).lower()
-                                Output.append((Indent + 'SpriteDraw("%s", (%s, %s), %s, %s)') % ((Line[8:].lower().split('|'))[0], (((Line[8:].lower().split('|'))[1]).split('x'))[0], (((Line[8:].lower().split('|'))[1]).split('x'))[1], (Line[8:].lower().split('|'))[2], State))
+                        if (Line[8:].lower().split('|'))[2] in Colours:
+                            if PythonMode == True:
+                                State = (Line[8:].lower().split('|'))[3]
+                                if State in ['false', 'true']:
+                                    State = (State[:1]).upper() + (State[1:]).lower()
+                                    Output.append((Indent + 'SpriteDraw("%s", (%s, %s), %s, %s)') % ((Line[8:].lower().split('|'))[0], (((Line[8:].lower().split('|'))[1]).split('x'))[0], (((Line[8:].lower().split('|'))[1]).split('x'))[1], (Line[8:].lower().split('|'))[2], State))
+                                else:
+                                    print('Invalid state, you might want to fix that.\n')
                             else:
-                                print('Invalid state, you might want to fix that.\n')
+                                Output.append('\n' + Indent + 'oamSet(&oamMain,')
+                                IndentCount += 1
+                                Indent = ('    ' * IndentCount)
+                                Output.append((Indent + '%s,') % str(Sprites.index((Line[8:].lower().split('|'))[0])))
+                                Output.append((Indent + '%s, %s,') % ((((Line[8:].lower().split('|'))[1]).split('x'))[0], (((Line[8:].lower().split('|'))[1]).split('x'))[1]))
+                                Output.append(Indent + '0,')
+                                Output.append((Indent + '%s,') % (Line[8:].lower().split('|'))[2])
+                                Output.append((Indent + 'SpriteSize_%s,') % SpriteSize[Sprites.index((Line[8:].lower().split('|'))[0])])
+                                Output.append(Indent + 'SpriteColorFormat_256Color,')
+                                Output.append((Indent + '%s,') % (Line[8:].lower().split('|'))[0])
+                                Output.append(Indent + '-1,')
+                                Output.append(Indent + 'false,')
+                                Output.append((Indent + '%s,') % (Line[8:].lower().split('|'))[3])
+                                Output.append(Indent + 'false, false, false')
+                                Output.append(Indent + ');')
+                                IndentCount -= 1
                         else:
-                            Output.append('\n' + Indent + 'oamSet(&oamMain,')
-                            IndentCount += 1
-                            Indent = ('    ' * IndentCount)
-                            Output.append((Indent + '%s,') % str(Sprites.index((Line[8:].lower().split('|'))[0])))
-                            Output.append((Indent + '%s, %s,') % ((((Line[8:].lower().split('|'))[1]).split('x'))[0], (((Line[8:].lower().split('|'))[1]).split('x'))[1]))
-                            Output.append(Indent + '0,')
-                            Output.append((Indent + '%s,') % (Line[8:].lower().split('|'))[2])
-                            Output.append((Indent + 'SpriteSize_%s,') % SpriteSize[Sprites.index((Line[8:].lower().split('|'))[0])])
-                            Output.append(Indent + 'SpriteColorFormat_256Color,')
-                            Output.append((Indent + '%s,') % (Line[8:].lower().split('|'))[0])
-                            Output.append(Indent + '-1,')
-                            Output.append(Indent + 'false,')
-                            Output.append((Indent + '%s,') % (Line[8:].lower().split('|'))[3])
-                            Output.append(Indent + 'false, false, false')
-                            Output.append(Indent + ');')
-                            IndentCount -= 1
+                            print("Colour doesn't exist yet, you probably might want to check that.\n")
                     else:
                         print("Sprite doesn't exist yet, consider checking that.\n")
                 else:
@@ -529,7 +522,8 @@ def ConvertFromHGF(Script, PythonMode=True, ForceCreate=False):
                     print('Palette already ended, consider removing it.\n')
             elif (Line[:3].lower()) == 'if ':
                 if IfWarning == False:
-                    print('Remember that you can only compare numbers and variables, not strings.\n')
+                    print('Remember that strings look like "String" and variables like Variable.')
+                    print('You cannot compare with different types.\n')
                     IfWarning = True
                 if '=' in Line or 'oppo' in Line:
                     StartedLoops += 1
@@ -541,7 +535,8 @@ def ConvertFromHGF(Script, PythonMode=True, ForceCreate=False):
                         IndentCount += 1
             elif (Line[:7].lower()) == 'not_if ':
                 if IfWarning == False:
-                    print('Remember that you can only compare numbers and variables, not strings.\n')
+                    print('Remember that strings look like "String" and variables like Variable.')
+                    print('You cannot compare with different types.\n')
                     IfWarning = True
                 if '=' in Line or 'oppo' in Line:
                     StartedLoops += 1
@@ -554,27 +549,35 @@ def ConvertFromHGF(Script, PythonMode=True, ForceCreate=False):
                 else:
                     print('Equality statement missing, you might want to fix it.\n')
             elif (Line[:7].lower()) == 'newvar ':
-                if ((Line[7:].lower()).split('|'))[0] in TypesAllowed:
-                    if PythonMode == True:
-                        Output.append((Indent + '%s = %s') % (((Line[7:].lower()).split('|'))[1], ((Line[7:].lower()).split('|'))[0]))
-                        ExistingVars.append(((Line[7:].lower()).split('|'))[1])
-                    else:
-                        Output.append((Indent + '%s %s;') % (((Line[7:].lower()).split('|'))[0], ((Line[7:].lower()).split('|'))[1]))
-                        ExistingVars.append(((Line[7:].lower()).split('|'))[1])
-                else:
-                    print('Variable not in the available types, you might want to fix it.\n')
-            elif (Line[:4].lower()) == 'var ':
-                if '=' in Line:
-                    if ((Line[:4].lower()).split('='))[0] in ExistingVars:
-                        if PythonMode == True:
-                            Output.append((Indent + '%s=%s') % (((Line[:4].lower()).split('='))[0], ((Line[:4].lower()).split('='))[1]))
-                            TempVarVals.append(((Line[:4].lower()).split('='))[1])
+                if (Line[:7].lower()) != 'i':
+                    if ((Line[7:].lower()).split('|'))[0] in TypesAllowed:
+                        if ((Line[7:].lower()).split('|'))[1] not in ExistingVars:
+                            if PythonMode == True:
+                                Output.append((Indent + '%s = %s') % (((Line[7:].lower()).split('|'))[1], ((Line[7:].lower()).split('|'))[0]))
+                                ExistingVars.append(((Line[7:].lower()).split('|'))[1])
+                            else:
+                                Output.append((Indent + '%s %s;') % (((Line[7:].lower()).split('|'))[0], ((Line[7:].lower()).split('|'))[1]))
+                                ExistingVars.append(((Line[7:].lower()).split('|'))[1])
                         else:
-                            Output.append((Indent + '%s=%s;') % (((Line[:4].lower()).split('='))[0], ((Line[:4].lower()).split('='))[1]))
+                            print('Variable already exists, you might want fix it.\n')
                     else:
-                        print("Variable doesn't exist yet, you might want to fix it.\n")
+                        print('Variable not in the available types, you might want to fix it.\n')
                 else:
-                    print('Equality statement missing, consider fixing it.\n')
+                    print("The variable name 'i' isn't allowed, you probably want to change it.\n")
+            elif (Line[:4].lower()) == 'var ':
+                if (Line[4:].lower()) != 'i':
+                    if ' = ' in Line:
+                        if (((Line[4:].lower()).split(' = '))[0]) in ExistingVars and len((Line[4:].lower()).split(' = ')) == 2:
+                            if PythonMode == True:
+                                Output.append((Indent + '%s = %s') % (((Line[4:].lower()).split(' = '))[0], ((Line[4:].lower()).split(' = '))[1]))
+                            else:
+                                Output.append((Indent + '%s = %s;') % (((Line[4:].lower()).split(' = '))[0], ((Line[4:].lower()).split(' = '))[1]))
+                        else:
+                            print("Variable doesn't exist yet, you might want to fix it.\n")
+                    else:
+                        print('Equality statement missing, consider fixing it.\n')
+                else:
+                    print("The variable name 'i' isn't allowed, you might want to change it.\n")
             elif Line.lower() == 'else':
                 EndedLoops += 1
                 StartedLoops += 1
