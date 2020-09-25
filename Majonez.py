@@ -207,27 +207,28 @@ def CheckExit():
             pygame.quit()
             sys.exit()
 
-def SpriteDraw(Name, Location, Colour):
-    if type(Colour) != int:
-        print("The colour isn't an int, you probably want to change that.\\n")
-    elif len(ColourList) - 1 < Colour:
-        print("The colour doesn't exist yet, you might want to change that.\\n")
-    elif type(ColourList[Colour]) == tuple or type(ColourList[Colour]) == list and len(ColourList[Colour]) == 3:
-        if type(Location) not in [tuple, list]:
-            print("Location notation is wrong, you may want to fix this.\\n")
-        else:
-            if type(Location[0]) != int or type(Location[1]) != int or len(Location) != 2:
-                print("Location notation is wrong, you probably want to fix this.\\n")
+def SpriteDraw(Name, Location, Colour, HiddenMode):
+    if HiddenMode != True:
+        if type(Colour) != int:
+            print("The colour isn't an int, you probably want to change that.\\n")
+        elif len(ColourList) - 1 < Colour:
+            print("The colour doesn't exist yet, you might want to change that.\\n")
+        elif type(ColourList[Colour]) == tuple or type(ColourList[Colour]) == list and len(ColourList[Colour]) == 3:
+            if type(Location) not in [tuple, list]:
+                print("Location notation is wrong, you may want to fix this.\\n")
             else:
-                if Name not in SpriteList[0]:
-                    print("Sprite probably doesn't exist yet, you may want to check your spelling.\\n")
+                if type(Location[0]) != int or type(Location[1]) != int or len(Location) != 2:
+                    print("Location notation is wrong, you probably want to fix this.\\n")
                 else:
-                    Size = SpriteList[1][SpriteList[0].index(Name)]
-                    Size_X = int((Size.split("x"))[0])
-                    Size_Y = int((Size.split("x"))[1])
-                    X = Location[0]
-                    Y = Location[1]
-                    pygame.draw.rect(Screen, ColourList[Colour], (((X * Scale), (Y * Scale)), ((Size_X * Scale), (Size_Y * Scale))))
+                    if Name not in SpriteList[0]:
+                        print("Sprite probably doesn't exist yet, you may want to check your spelling.\\n")
+                    else:
+                        Size = SpriteList[1][SpriteList[0].index(Name)]
+                        Size_X = int((Size.split("x"))[0])
+                        Size_Y = int((Size.split("x"))[1])
+                        X = Location[0]
+                        Y = Location[1]
+                        pygame.draw.rect(Screen, ColourList[Colour], (((X * Scale), (Y * Scale)), ((Size_X * Scale), (Size_Y * Scale))))
             
 
 def RefreshScreen():
@@ -246,6 +247,7 @@ if __name__ != "__main__":
     InitScreen = Screen
     pygame.display.set_caption('Window on PC with %sx scaling.' % str(Scale))
     FPS = 60
+
 
 """
 
@@ -383,7 +385,7 @@ def ConvertFromHGF(Script, PythonMode=True, ForceCreate=False):
                         Output.append(Indent + 'consoleInit(&bottomScreen, 3, BgType_Text4bpp, BgSize_T_256x256, 31, 0, false, true);')
                         Output.append(Indent + 'consoleSelect(&bottomScreen);\n')
                         Output.append(Indent + 'iprintf("HGF and the HGF converter were\\n");')
-                        Output.append(Indent + 'iprintf("created by Harry Nelsen\\n");')
+                        Output.append(Indent + 'iprintf("created by Harry Nelsen\\n\\n");')
                 else:
                     print('Setup has already been called, consider removing it.\n')
             elif (Line[:5].lower()) == 'echo ':
@@ -489,7 +491,12 @@ def ConvertFromHGF(Script, PythonMode=True, ForceCreate=False):
                 if ExtPalette == True:
                     if ((Line[8:].lower().split('|'))[0]) in Sprites:
                         if PythonMode == True:
-                            Output.append((Indent + 'SpriteDraw("%s", (%s, %s), %s)') % ((Line[8:].lower().split('|'))[0], (((Line[8:].lower().split('|'))[1]).split('x'))[0], (((Line[8:].lower().split('|'))[1]).split('x'))[1], (Line[8:].lower().split('|'))[2]))
+                            State = (Line[8:].lower().split('|'))[3]
+                            if State in ['false', 'true']:
+                                State = (State[:1]).upper() + (State[1:]).lower()
+                                Output.append((Indent + 'SpriteDraw("%s", (%s, %s), %s, %s)') % ((Line[8:].lower().split('|'))[0], (((Line[8:].lower().split('|'))[1]).split('x'))[0], (((Line[8:].lower().split('|'))[1]).split('x'))[1], (Line[8:].lower().split('|'))[2], State))
+                            else:
+                                print('Invalid state, you might want to fix that.\n')
                         else:
                             Output.append('\n' + Indent + 'oamSet(&oamMain,')
                             IndentCount += 1
@@ -580,6 +587,21 @@ def ConvertFromHGF(Script, PythonMode=True, ForceCreate=False):
                 IndentCount += 1
             elif Line == '' or Line == '\n':
                 pass
+            elif Line[:1] == '#':
+                if PythonMode == True:
+                    Output.append((Indent + '#%s') % Line[1:])
+                else:
+                    Output.append((Indent + '//%s') % Line[1:])
+            elif Line[:2] == '//':
+                if PythonMode == True:
+                    Output.append((Indent + '#%s') % Line[2:])
+                else:
+                    Output.append((Indent + '//%s') % Line[2:])
+            elif Line[:4] == 'rem ':
+                if PythonMode == True:
+                    Output.append((Indent + '#%s') % Line[3:])
+                else:
+                    Output.append((Indent + '//%s') % Line[3:])
             else:
                 print('Command not found, it either may be incorrectly spelled or just not exist.')
                 print('You may want to check your spelling.\n')
@@ -625,7 +647,8 @@ def ReadFile(FileName, PythonMode=True):
         FileContents = FileObj.readlines()
         FileObj.close()
         return ConvertFromHGF(FileContents, PythonMode)
-    except:
+    except Exception as e:
+        print('Catastrophic error: ' + str(e))
         return []
 
 def WriteFile(FileName):
