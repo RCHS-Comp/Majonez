@@ -1,5 +1,7 @@
 package main
 
+// (c) Harry Nelsen 2021
+
 import (
     "fmt"
     "strings"
