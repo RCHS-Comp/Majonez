@@ -25,7 +25,7 @@ func CV_Convert(Input Command, GlobalStr []string) (int, string) {
     switch Input.Name {
         case "echo":
             if !(echo.Compliant(Input)) {
-                return 5, "Invalid type. (Only strings supported.)"
+                return 5, "Invalid type. (Only strings supported)"
             }
             
             Output = fmt.Sprintf("print(%s)", Input.Arguments[0])
