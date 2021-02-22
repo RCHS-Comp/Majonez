@@ -26,3 +26,8 @@
 
 * Everything
   * Harry Nelsen
+
+## Version 1.1.0
+
+* Everything
+  * Harry Nelsen
