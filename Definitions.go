@@ -1,5 +1,9 @@
 package main
 
+var HGF_V_Major = 1
+var HGF_V_Minor = 1
+var HGF_V_Micro = 0
+
 // HGF version 1.1.0
 // (c) Harry Nelsen 2021
 
