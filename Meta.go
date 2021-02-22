@@ -102,6 +102,10 @@ func M_VariableExist(Input string) (bool) {
     return (In_string(VariableNames, Input) != -1)
 }
 
+func M_VarAvailable(Input string) (bool) {
+    return (In_string(VariableUnavailable, Input) == -1)
+}
+
 func M_VariableType(Input string) (int) {
     VarType := -1
     Location := In_string(VariableNames, Input)
@@ -114,11 +118,15 @@ func M_VariableType(Input string) (int) {
 }
 
 func M_AddVar(Name string, Type int) (bool) {
-    if In_string(VariableNames, Name) != -1 {
+    if (In_string(VariableNames, Name) != -1 || In_string(VariableUnavailable, Name) != -1) {
         return false
     }
     
     if (Type < 0 || Type > 5) {
+        return false
+    }
+    
+    if (Outliers(VariableAllowedChars, Name) != 0 || len(Name) < 1) {
         return false
     }
     
@@ -172,8 +180,4 @@ func M_StrToType(Input string) (int) {
     }
     
     return -1
-}
-
-func M_VarAvailable(Input string) (bool) {
-    return (In_string(VariableUnavailable, Input) == -1)
 }
