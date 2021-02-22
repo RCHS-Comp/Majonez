@@ -1,0 +1,16 @@
+echo{"Test"}
+    rem{"This is a test of commands and things like that"}
+
+loop_st
+    if{_, 1, 2}
+        echo{"This is broken lol"}
+        loop_bk
+    elseif{!, 1, 2}
+        test
+        echo{"This works."}
+    else
+        echo{"What."}
+    endif
+loop_nd
+
+test
