@@ -1,5 +1,7 @@
 package main
 
+// (c) Harry Nelsen 2021
+
 import (
     "fmt"
 )
@@ -41,17 +43,19 @@ func P_ParseFile(File []string) (int) {
     }
 
     for CurrentLine, FileLine := range File {
-        LineCommands, GlobalStr := CMD_ReadLine(FileLine, GlobalStr)
-        
-        for _, Command := range LineCommands {
-            VarOut, Output = CV_Convert(Command, GlobalStr)
-            if VarOut == 5 {
-                Errors ++
-                P_PrintError(Output, CurrentLine)
-            }
+        if Outliers(" " + "\r\n", FileLine) != 0 {
+            LineCommands, GlobalStr := CMD_ReadLine(FileLine, GlobalStr)
             
-            if (Errors > AllowedErrors && !(AllowedErrors == -1)) {
-                return Errors
+            for _, Command := range LineCommands {
+                VarOut, Output = CV_Convert(Command, GlobalStr)
+                if VarOut == 5 {
+                    Errors ++
+                    P_PrintError(Output, CurrentLine)
+                }
+                
+                if (Errors > AllowedErrors && !(AllowedErrors == -1)) {
+                    return Errors
+                }
             }
         }
     }
