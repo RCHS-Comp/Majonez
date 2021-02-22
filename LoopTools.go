@@ -49,7 +49,7 @@ func LOOP_ParseStatement(Statement Command, IndentCount *int) (string, bool) {
 
     switch Statement.Name {
         case "loop_st":
-            Output = P_I(*IndentCount) + "while:"
+            Output = P_I(*IndentCount) + "while True:"
             
             OpenLoops ++
             *IndentCount ++
