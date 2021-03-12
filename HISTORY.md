@@ -2,7 +2,7 @@
 
 Released **0.9** on _May 6th, 2020_ (Not on GitHub)
 
-Version **0.9 SE** is unknown at the moment because I never publicly uploaded it, but I'll see if if I can get more details. (Also SE might actually be PR, I don't know)
+Version **0.9 SE** on _May 8th, 2020_ (Not publicly released due to 1.0 coming soon)
 
 Released **1.0** on _May 10th, 2020_ (commit is wrong)
 
