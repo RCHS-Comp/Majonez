@@ -1,8 +1,8 @@
 # Release history
 
-Released **0.9** on _May 6th, 2020_ (Not on GitHub)
+Released **0.9** on _May 6th, 2020_ (not on GitHub)
 
-Version **0.9 SE** on _May 8th, 2020_ (Not publicly released due to 1.0 coming soon)
+Version **0.9 SE** on _May 8th, 2020_ (not publicly released due to 1.0 coming soon)
 
 Released **1.0** on _May 10th, 2020_ (commit is wrong)
 
