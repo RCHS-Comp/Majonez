@@ -20,14 +20,14 @@ var IF_PossibleStatements = []string{"if", "elseif", "else", "endif"}
 // Definitions for the commands
 //////////////////////////////////////////
 
-var loop_start = Meta{Name: "loop_st", Arguments: 0, InputTypes: nil, OutputType: 0}
-var loop_end = Meta{Name: "loop_nd", Arguments: 0, InputTypes: nil, OutputType: 0}
-var loop_break = Meta{Name: "loop_bk", Arguments: 0, InputTypes: nil, OutputType: 0}
+var loop_start = Meta{Name: "loop_st", Arguments: 0, InputTypes: nil, OutputType: 99}
+var loop_end = Meta{Name: "loop_nd", Arguments: 0, InputTypes: nil, OutputType: 99}
+var loop_break = Meta{Name: "loop_bk", Arguments: 0, InputTypes: nil, OutputType: 99}
 
-var if_statement = Meta{Name: "if", Arguments: 3, InputTypes: []int{1, 7, 7}, OutputType: 0}
-var elseif_statement = Meta{Name: "elseif", Arguments: 3, InputTypes: []int{1, 7, 7}, OutputType: 0}
-var else_statement = Meta{Name: "else", Arguments: 0, InputTypes: nil, OutputType: 0}
-var endif_statement = Meta{Name: "endif", Arguments: 0, InputTypes: nil, OutputType: 0}
+var if_statement = Meta{Name: "if", Arguments: 3, InputTypes: []int{42, 40, 40}, OutputType: 99}
+var elseif_statement = Meta{Name: "elseif", Arguments: 3, InputTypes: []int{42, 40, 40}, OutputType: 99}
+var else_statement = Meta{Name: "else", Arguments: 0, InputTypes: nil, OutputType: 99}
+var endif_statement = Meta{Name: "endif", Arguments: 0, InputTypes: nil, OutputType: 99}
 
 //////////////////////////////////////////
 
