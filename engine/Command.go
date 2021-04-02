@@ -9,30 +9,14 @@ import (
 )
 
 //////////////////////////////////////////
-// Command Obj
-//////////////////////////////////////////
-
-type Command struct {
-    Name string
-    Arguments []string
-}
-
-func (Input *Command) Reset() {
-    Input.Name = "nop"
-    Input.Arguments = nil
-}
-
-//////////////////////////////////////////
-
-//////////////////////////////////////////
 // Command tools
 //////////////////////////////////////////
 
-func CMD_Convert(Input string) (Command) {  // Convert command with '{}' to obj
+func CMD_Convert(Input string) (Command) {  // Convert command to obj
     var Output Command
     Output.Reset()
     
-    if (Usage(Input, '{') != 1 || Usage(Input, '}') != 1) {
+    if (Usage(Input, '{') != 1 || Usage(Input, '}') != 1) { // If it doesn't have {}, return no arguments
         Output.Name = Input
         Output.Arguments = nil
         return Output
@@ -68,8 +52,9 @@ func CMD_RestoreStr(Input string, Source []string) (string) {   // Convert strin
     return Output
 }
 
-func CMD_ReadLine(Input string, GlobalStr []string) ([]Command, []string) {
+func CMD_ReadLine(Input string) ([]Command, []string) { // So I tried to have a pointer to modify this, it's a bad solution because of ram and etc.
     var Output []Command
+    var GlobalStr []string
     
     Input = strings.Replace(Input, " ,", ",", -1)   // Make it able to be separated by commas
     Input = strings.Replace(Input, ", ", ",", -1)
@@ -88,7 +73,7 @@ func CMD_ReadLine(Input string, GlobalStr []string) ([]Command, []string) {
         StrCount ++ // Advance the string count
     }
     
-    Input = StripSpace(Input)   // This will allow us to have \n in our strings THEN remove any unwanted endings
+    Input = StripSpace(Input)   // This will allow us to have line endings in our strings THEN remove any unwanted endings
     Input = strings.ToLower(Input)  // Since all the strings have been removed, we can make them lowercase now
     Input = strings.Replace(Input, "str@", "STR@", -1)  // Need to make these uppercase again
     
@@ -100,22 +85,38 @@ func CMD_ReadLine(Input string, GlobalStr []string) ([]Command, []string) {
     return Output, GlobalStr
 }
 
-func CMD_VarType(Input string) (int) {  // Get type of variable
+func CMD_VarType(Input string) (int) {  // Detect variable type
+    if Input == "" {
+        return 0
+    }
+
     if IsInt(Input) {
-        return 2
+        return 10
     } else if IsFloat(Input) {
-        return 3
+        return 11
+    }
+    
+    if (Input[0] == '"' && Input[len(Input) - 1] == '"') {
+        return 20
+    }
+    
+    if In_string(VariableUnavailable, Input) != -1 {    // If it is an unavailable variable, then it's definitely a variable
+        return 30
     }
     
     if len(Input) < 4 { // This is for things with letters under 4 characters
-        if (Outliers(VariableAllowedChars, Input) == 0 || (Input == "!" || Input == "_")) {
-            return 6
+        if Outliers(VariableAllowedChars, Input) == 0 {    // Possible variables
+            return 31
         }
-    } else if Input[:4] == "STR@" { // For stuff in the string map
+        
+        return -1   // Return before it crashes
+    } else if Input[:4] == "STR@" { // Check for string map reference
+        return 20
+    } else if (Input == "true" || Input == "false") {   // Bools
         return 1
     } else {    // Everything
         if Outliers(VariableAllowedChars, Input) == 0 {
-            return 6
+            return 31
         }
     }
     
@@ -123,7 +124,7 @@ func CMD_VarType(Input string) (int) {  // Get type of variable
 }
 
 func CMD_IsStrRef(Input string) (bool) {    // See if variable refers to the string map
-    return (CMD_VarType(Input) == 1)
+    return (CMD_VarType(Input) == 20)
 }
 
 func CMD_StrInRange(Input string, Source []string) (bool) { // See if reference is in the string map
