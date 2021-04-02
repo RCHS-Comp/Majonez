@@ -1,7 +1,7 @@
 package main
 
 // String tools that I often use
-// (c) Harry Nelsen 2020
+// (c) Harry Nelsen 2021
 
 import (
     "strings"
