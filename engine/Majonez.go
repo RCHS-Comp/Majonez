@@ -12,14 +12,14 @@ import (
 
 var MJ_V_Major = 1
 var MJ_V_Minor = 1
-var MJ_V_Micro = 0
+var MJ_V_Micro = 1
 var MJ_Year = 2021
 
 var MJ_InfoTriggers = []string{"-h", "--help", "--info", "--about"}
 
 func MJ_Info() {
     fmt.Println("//////////////////////////////////////////")
-    fmt.Printf("Majonez [Version %d.%d.%d]\n", MJ_V_Major, MJ_V_Minor, MJ_V_Micro)
+    fmt.Printf("Majonez [Version PRE-%d.%d.%d]\n", MJ_V_Major, MJ_V_Minor, MJ_V_Micro)
     fmt.Printf("OS: %s, Arch: %s\n", runtime.GOOS, runtime.GOARCH)
     fmt.Printf("(c) Harry Nelsen %d\n", MJ_Year)
     fmt.Println("//////////////////////////////////////////")
