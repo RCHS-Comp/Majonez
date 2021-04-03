@@ -23,3 +23,5 @@ Provisioning for **1.1.0** on _February 18, 2021_ (I made mistakes on virtually 
 Provisioning for **1.1.0** on _February 19, 2021_
 
 Released **1.1.0** on _February 21, 2021_
+
+Released **Prerelease 1.1.1** on _April 1, 2021_
